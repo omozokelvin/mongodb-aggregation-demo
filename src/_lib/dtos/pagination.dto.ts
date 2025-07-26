@@ -17,3 +17,5 @@ export class PaginationRequestDto {
   @Transform(({ value }) => +value)
   limit: number;
 }
+
+export type SortRecord = Record<string, 1 | -1>;

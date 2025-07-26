@@ -173,7 +173,7 @@
   "customer": {
     "$oid": "6884933cf51497f4542837a6"
   },
-  "amount": 96557,
+  "amount": 97087,
   "productCategory": "Toys & Games",
   "orderDate": {
     "$date": "2025-05-30T06:12:31.266Z"

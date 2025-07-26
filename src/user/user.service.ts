@@ -1,10 +1,10 @@
 import { User, UserStatus } from '@/user/entities/user.entity';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model } from 'mongoose';
+import { FilterQuery, Model, PipelineStage } from 'mongoose';
 import { faker } from '@faker-js/faker';
 import { startOfYear } from 'date-fns';
-import { QueryUserDto, QueryUserResponseDto } from '@/user/dto/user.dto';
+import { MatchQueryDto, MatchResponseDto } from '@/user/dto/user.dto';
 
 @Injectable()
 export class UserService {
@@ -43,8 +43,8 @@ export class UserService {
     return randomRecords[0];
   }
 
-  async paginate(query: QueryUserDto): Promise<QueryUserResponseDto> {
-    const { status, signupDate, limit } = query;
+  async match(query: MatchQueryDto): Promise<MatchResponseDto> {
+    const { status, signupDate, limit, search } = query;
 
     this.logger.log({ status, signupDate, limit });
 
@@ -58,7 +58,11 @@ export class UserService {
       filter.signupDate = { $gte: signupDate };
     }
 
-    const pipeline = [
+    if (search) {
+      filter.$text = { $search: search };
+    }
+
+    const pipeline: PipelineStage[] = [
       {
         $match: filter,
       },
@@ -67,7 +71,12 @@ export class UserService {
       },
     ];
 
-    const items = await this.model.aggregate(pipeline);
+    if (search) {
+      pipeline.push({ $addFields: { score: { $meta: 'textScore' } } });
+      pipeline.push({ $sort: { score: { $meta: 'textScore' } } });
+    }
+
+    const items = await this.model.aggregate<User>(pipeline);
     const total = items.length;
 
     const meta = { total, limit };

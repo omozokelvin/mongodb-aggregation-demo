@@ -1,5 +1,6 @@
+import { PaginationRequestDto } from '@/_lib/dtos/pagination.dto';
 import { OrderService } from '@/order/order.service';
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 @Controller('order')
@@ -10,5 +11,20 @@ export class OrderController {
   @Post('/seed')
   seed() {
     return this.orderService.seed();
+  }
+
+  @Get('group')
+  group() {
+    return this.orderService.group();
+  }
+
+  @Get('project')
+  project(@Query() query: PaginationRequestDto) {
+    return this.orderService.project(query);
+  }
+
+  @Get('sort')
+  sort(@Query() query: PaginationRequestDto) {
+    return this.orderService.sort(query);
   }
 }

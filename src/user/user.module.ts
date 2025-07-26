@@ -12,6 +12,8 @@ import { UserService } from '@/user/user.service';
         useFactory: async () => {
           const schema = UserSchema;
 
+          schema.index({ name: 'text' });
+
           return schema;
         },
       },
