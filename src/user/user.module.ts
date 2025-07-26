@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from '@/user/entities/user.entity';
-import { genSalt, hashSync } from 'bcryptjs';
 import { UserController } from '@/user/user.controller';
 import { UserService } from '@/user/user.service';
 
@@ -13,14 +12,6 @@ import { UserService } from '@/user/user.service';
         useFactory: async () => {
           const schema = UserSchema;
 
-          schema.pre('save', async function () {
-            if (this.isModified('password')) {
-              const salt = await genSalt(10);
-              const hash = await hashSync(this.password, salt);
-              this.password = hash;
-            }
-          });
-
           return schema;
         },
       },
@@ -28,5 +19,6 @@ import { UserService } from '@/user/user.service';
   ],
   controllers: [UserController],
   providers: [UserService],
+  exports: [UserService],
 })
 export class UserModule {}

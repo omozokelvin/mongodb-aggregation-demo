@@ -1,7 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { ApiHideProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
 import { HydratedDocument } from 'mongoose';
+
+export enum UserStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+}
 
 @Schema()
 export class User {
@@ -9,7 +12,7 @@ export class User {
     trim: true,
     required: true,
   })
-  fullName: string;
+  name: string;
 
   @Prop({
     required: true,
@@ -21,12 +24,17 @@ export class User {
   })
   email: string;
 
-  @Exclude()
-  @ApiHideProperty()
   @Prop({
-    select: false,
+    required: true,
   })
-  password: string;
+  signupDate: Date;
+
+  @Prop({
+    required: true,
+    enum: Object.values(UserStatus),
+    default: UserStatus.ACTIVE,
+  })
+  status: UserStatus;
 }
 
 export type UserDocument = HydratedDocument<User>;
