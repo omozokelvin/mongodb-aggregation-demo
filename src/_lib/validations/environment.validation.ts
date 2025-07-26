@@ -6,9 +6,6 @@ export class EnvironmentVariables {
   @IsString()
   NODE_ENV: EnvironmentEnum;
 
-  @IsString()
-  DATABASE_URL: string;
-
   @IsInt()
   PORT: number;
 

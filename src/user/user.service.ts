@@ -1,12 +1,14 @@
 import { User, UserStatus } from '@/user/entities/user.entity';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import { faker } from '@faker-js/faker';
 import { startOfYear } from 'date-fns';
+import { QueryUserDto, QueryUserResponseDto } from '@/user/dto/user.dto';
 
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger(UserService.name);
   constructor(@InjectModel(User.name) private readonly model: Model<User>) {}
 
   async seed(): Promise<User[]> {
@@ -39,5 +41,40 @@ export class UserService {
     ]);
 
     return randomRecords[0];
+  }
+
+  async paginate(query: QueryUserDto): Promise<QueryUserResponseDto> {
+    const { status, signupDate, limit } = query;
+
+    this.logger.log({ status, signupDate, limit });
+
+    const filter: FilterQuery<User> = {};
+
+    if (status) {
+      filter.status = status;
+    }
+
+    if (signupDate) {
+      filter.signupDate = { $gte: signupDate };
+    }
+
+    const pipeline = [
+      {
+        $match: filter,
+      },
+      {
+        $limit: limit,
+      },
+    ];
+
+    const items = await this.model.aggregate(pipeline);
+    const total = items.length;
+
+    const meta = { total, limit };
+
+    return {
+      meta,
+      items,
+    };
   }
 }
